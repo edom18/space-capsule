@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Space capsule</title>
+<style>
+body, div, p {
+    margin: 0 auto;
+    padding: 0;
+}
+canvas {
+    background: #111;
+}
+</style>
+</head>
+<body>
+
+<script src="js/lib/webgl-utils.js"></script>
+<script src="js/lib/inka3d.js"></script>
+<script src="js/lib/util.js"></script>
+<script src="js/lib/Class.js"></script>
+<script src="js/lib/Disposable.js"></script>
+<script src="js/lib/EventDispatcher.js"></script>
+<script src="js/lib/Component.js"></script>
+<script src="js/lib/View.js"></script>
+<script src="js/lib/Model.js"></script>
+<script src="material/world/world.js"></script>
+<script src="js/InkaModel.js"></script>
+<script src="js/InkaScenes.js"></script>
+<script>
+(function (win, doc) {
+
+     'use strict';
+
+    var KEYFRAME_TIME = 0.033333 * 1000,
+        keyframe_map = {
+            '0': -90  * KEYFRAME_TIME,
+            '1': 139  * KEYFRAME_TIME,
+            '2': 439  * KEYFRAME_TIME,
+            '3': 739  * KEYFRAME_TIME,
+            '4': 1039 * KEYFRAME_TIME,
+            '5': 1339 * KEYFRAME_TIME,
+            '6': 1639 * KEYFRAME_TIME
+        };
+
+    var CapsuleView = View.extend({
+        className: 'capsule-view',
+        tagName: 'canvas',
+        init: function (args) {
+            args || (args = {});
+            this._super.apply(this, arguments);
+
+            this._currentPos = keyframe_map[0];
+            this._prevSceneId = 0;
+
+            this.el.width  = win.innerWidth;
+            this.el.height = win.innerHeight;
+            doc.body.appendChild(this.el);
+
+            //Default view is opacity 0.
+            this._setup();
+        },
+
+        /*! --------------------------------------------------------------------
+            PRIVATE METHODS
+        ------------------------------------------------------------------------ */
+        _setup: function () {
+
+            this._scene = new InkaScenes({
+                canvas: this.el,
+                jobs: 136
+            });
+
+            this._world = this._scene.addScene('world');
+        },
+
+        /*! --------------------------------------------------------------------
+            PUBLIC METHODS
+        ------------------------------------------------------------------------ */
+        play: function () {
+
+            var that = this;
+
+            this._currentPos = keyframe_map[0];
+            this._prevSceneId = 0;
+
+            var LAST_KEYFRAME = 1699;
+            this.keyframe(0, LAST_KEYFRAME * KEYFRAME_TIME, {
+                loop: true
+            });
+        },
+
+        reset: function () {
+            this._scene.useCamera('world', 'OpCameraShape');
+            this.play();
+        },
+
+        /**
+         * @param {number} scene_id
+         */
+        go: function (scene_id, speed) {
+            speed = speed || 1;
+
+            var that = this,
+                from = this._currentPos,
+                to   = keyframe_map[scene_id],
+                def = new util.Deferred();
+
+            this._scene.useCamera('world', 'cameraShape1');
+            this._currentPos = to;
+
+            console.log('[LOG] Capsule start');
+            this.keyframe(from, to, {
+                speed: speed
+            }).done(function () {
+
+                var LOOP_SPAN = 50,
+                    start = to + (1 * Game.KEYFRAME_TIME),
+                    end   = to + (LOOP_SPAN * Game.KEYFRAME_TIME);
+
+                that.keyframe(start, end);
+                console.log('[LOG] Capsule end');
+                def.resolve();
+            });
+
+            return def;
+        },
+
+        keyframe: function (start, end, opt) {
+            opt || (opt = {});
+            return this._world.keyframe(start, end, opt);
+        }
+    });
+
+    var capsule_view = new CapsuleView();
+    capsule_view.play();
+
+}(window, document));
+
+</script>
+</body>
+</html>
