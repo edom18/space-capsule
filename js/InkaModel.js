@@ -4,13 +4,9 @@ var InkaModel = function (name, group) {
 
     //this.defaultCameraShape = 'cameraShape1';
     this.defaultCameraShape = 'OpCameraShape';
-
     this.group = group;
-
     this.motions = [];
-
     this.sceneData.init();
-
     this.waitLoad();
 };
 
@@ -19,7 +15,7 @@ InkaModel.prototype.initAccessor = function () {
         infos = this.sceneData.scenes[this.name].parameterInfos,
         scene = this.scene;
 
-    if (infos['time']) {
+    if (infos.time) {
         self._time = scene.getFloatVector('time');
         self.time = function (value) {
             self._time[0] = value;

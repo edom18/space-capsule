@@ -12,9 +12,18 @@ canvas {
     background: #111;
     vertical-align: top;
 }
+#ctrl {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
 </style>
 </head>
 <body>
+
+<div id="ctrl">
+    <p><input type="button" value="カメラ切り替え" id="viewSwitch" /></p>
+<!-- /#ctrl --></div>
 
 <script src="js/lib/webgl-utils.js"></script>
 <script src="js/lib/inka3d.js"></script>
@@ -25,13 +34,15 @@ canvas {
 <script src="js/lib/Component.js"></script>
 <script src="js/lib/View.js"></script>
 <script src="js/lib/Model.js"></script>
+<script src="js/lib/Vector3.js"></script>
+<script src="js/lib/Matrix4.js"></script>
 <script src="material/world/world.js"></script>
 <script src="js/InkaModel.js"></script>
 <script src="js/InkaScenes.js"></script>
 <script>
 (function (win, doc) {
 
-     'use strict';
+    'use strict';
 
     var KEYFRAME_TIME = 0.033333 * 1000,
         keyframe_map = {
@@ -130,11 +141,53 @@ canvas {
         keyframe: function (start, end, opt) {
             opt || (opt = {});
             return this._world.keyframe(start, end, opt);
+        },
+
+        useCamera: function (cameraName) {
+            this._scene.useCamera('world', cameraName);
+        },
+
+        rotateX: function (angle) {
+            this._scene.rotateX(angle);
+        },
+
+        rotateY: function (angle) {
+            this._scene.rotateY(angle);
         }
     });
 
     var capsule_view = new CapsuleView();
     capsule_view.play();
+
+    doc.getElementById('viewSwitch').addEventListener('click', function () {
+        capsule_view.useCamera('cameraShape1');
+    }, false);
+
+    var dragging = false;
+    var prevX = 0;
+    var prevY = 0;
+
+    doc.addEventListener('mousedown', function (e) {
+        dragging = true;
+        prevX = e.pageX;
+        prevY = e.pageY;
+    }, false);
+
+    doc.addEventListener('mousemove', function (e) {
+        if (!dragging) {
+            return;
+        }
+
+        var x = e.pageX - prevX;
+        var y = e.pageY - prevY;
+
+        capsule_view.rotateY(x);
+        capsule_view.rotateX(y);
+    }, false);
+
+    doc.addEventListener('mouseup', function (e) {
+        dragging = false;
+    }, false);
 
 }(window, document));
 

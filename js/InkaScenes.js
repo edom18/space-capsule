@@ -152,16 +152,52 @@ InkaScenes.prototype.update = function () {
     );
 };
 
+InkaScenes.prototype.rotateX = (function () {
+    
+    var m = new Matrix4();
+    var mat = m.identity(m.create());
+    var axis = new Vector3(1, 0, 0);
 
-InkaScenes.prototype.render = function () {
-    var group = this.group,
-        viewMatrix = this.viewMatrix,
-        projectionMatrix = this.projectionMatrix;
+    return function (angle) {
+        var tmp = m.identity(m.create());
+        this._rotateXMatrix = m.rotate(tmp, angle, axis, mat);
+    };
+}());
 
-    // render scene
-    // clear back buffer
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+InkaScenes.prototype.rotateY = (function () {
+    
+    var m = new Matrix4();
+    var mat = m.identity(m.create());
+    var axis = new Vector3(0, 1, 0);
 
-    // render the group using render layer 'color'
-    group.render(viewMatrix, projectionMatrix, 'color');
-};
+    return function (angle) {
+        var tmp = m.identity(m.create());
+        this._rotateYMatrix = m.rotate(tmp, angle, axis, mat);
+    };
+}());
+
+InkaScenes.prototype.render = (function () {
+
+    var m = new Matrix4();
+
+    return function () {
+
+        var group = this.group,
+            viewMatrix = this.viewMatrix,
+            projectionMatrix = this.projectionMatrix;
+
+        if (this._rotateXMatrix) {
+            m.multiply(viewMatrix, this._rotateXMatrix, viewMatrix);
+        }
+        if (this._rotateYMatrix) {
+            m.multiply(viewMatrix, this._rotateYMatrix, viewMatrix);
+        }
+
+        // render scene
+        // clear back buffer
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        // render the group using render layer 'color'
+        group.render(viewMatrix, projectionMatrix, 'color');
+    };
+}());
