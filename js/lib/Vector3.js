@@ -3,32 +3,60 @@
     'use strict';
 
     /**
-      Vector3 class
-      @constructor
-      @param {number} x Position of x.
-      @param {number} y Position of y.
-      @param {number} z Position of z.
-      */
-
+     * Vector3 class
+     * @constructor
+     * @class
+     * @param {number} x Position of x.
+     * @param {number} y Position of y.
+     * @param {number} z Position of z.
+     */
     function Vector3(x, y, z) {
-        this.x = x != null ? x : 0;
-        this.y = y != null ? y : 0;
-        this.z = z != null ? z : 0;
+        this.set(x, y, z);
     }
 
+    /**
+     * Clear with zero.
+     */
     Vector3.prototype.zero = function() {
         this.x = this.y = this.z = 0;
         return this;
     };
 
+    /**
+     * Check to equal values.
+     * @param {Vector3} v
+     */
     Vector3.prototype.equal = function(v) {
         return (this.x === v.x) && (this.y === v.y) && (this.z === v.z);
     };
 
+    /**
+     * Set values to x,y,z
+     * @param {number|Array} x
+     * @param {?number} y
+     * @param {?number} z
+     */
     Vector3.prototype.set = function(x, y, z) {
-        this.x = x != null ? x : 0;
-        this.y = y != null ? y : 0;
-        this.z = z != null ? z : 0;
+
+        var _x = 0,
+            _y = 0,
+            _z = 0;
+
+        if (util.isArray(x)) {
+            _x = x[0] || 0;
+            _y = x[1] || 0;
+            _z = x[2] || 0;
+        }
+        else {
+            _x = x || 0;
+            _y = y || 0;
+            _z = z || 0;
+        }
+
+        this.x = _x;
+        this.y = _y;
+        this.z = _z;
+
         return this;
     };
 
