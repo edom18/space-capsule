@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <title>Space capsule</title>
 <style>
+html {
+    overflow: hidden;
+}
 body, div, p {
     margin: 0 auto;
     padding: 0;
@@ -153,6 +156,10 @@ canvas {
 
         rotateY: function (angle) {
             this._scene.rotateY(angle);
+        },
+
+        translate: function (v) {
+            this._scene.translate(v);
         }
     });
 
@@ -187,6 +194,13 @@ canvas {
 
     doc.addEventListener('mouseup', function (e) {
         dragging = false;
+    }, false);
+
+    var z = 0;
+    doc.addEventListener('mousewheel', function (e) {
+        var delta = e.wheelDelta;
+        z += delta / 100;
+        capsule_view.translate(new Vector3(0, 0, z));
     }, false);
 
 }(window, document));

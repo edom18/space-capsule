@@ -176,6 +176,23 @@ InkaScenes.prototype.rotateY = (function () {
     };
 }());
 
+InkaScenes.prototype.translate = (function () {
+
+    var m = new Matrix4(),
+        mat = m.identity(m.create()),
+        z_axis = new Vector3(0, 0, 1);
+
+    return function (v) {
+        var tmp = m.identity(m.create()),
+            viewMatrix = this.viewMatrix;
+
+        var local = z_axis.applyMatrix4withoutW(viewMatrix).normalize();
+        local.multiplyScalar(v.z);
+
+        this._translateMatrix = m.translate(tmp, local, mat);
+    };
+}());
+
 InkaScenes.prototype.render = (function () {
 
     var m = new Matrix4();
@@ -191,6 +208,9 @@ InkaScenes.prototype.render = (function () {
         }
         if (this._rotateYMatrix) {
             m.multiply(viewMatrix, this._rotateYMatrix, viewMatrix);
+        }
+        if (this._translateMatrix) {
+            m.multiply(viewMatrix, this._translateMatrix, viewMatrix);
         }
 
         // render scene
