@@ -2,8 +2,8 @@ var InkaModel = function (name, group) {
     this.name = name;
     this.sceneData = window[name];
 
-    //this.defaultCameraShape = 'cameraShape1';
-    this.defaultCameraShape = 'OpCameraShape';
+    this.defaultCameraShape = 'cameraShape1';
+    //this.defaultCameraShape = 'OpCameraShape';
     this.group = group;
     this.motions = [];
     this.sceneData.init();

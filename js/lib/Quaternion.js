@@ -31,6 +31,7 @@
      *
      * @example
      *      Quaternionの掛け算の公式は以下。
+     *      ※ただし、計算しやすいよう本来はVxUとなるところを、UxVとしている点に注意。
      *      ・は内積、×は外積、U, Vはともにベクトル。
      *      ;の左が実部、右が虚部。基本的に実部は`0`で計算。
      *      A = (a; U) 
@@ -76,8 +77,25 @@
      * @param {number} radian
      * @param {Vector3} vector
      * @return {Quaternion}
+     * @example
+     *
+     *      var p = new Quaternion(0, vector);
+     *
+     *      var rad = sp * DEG_TO_RAD;
+     *
+     *      // rad角の回転クォータニオンとその共役を生成
+     *      var q = makeRotatialQuaternion(rad, vec)
+     *      var r = makeRotatialQuaternion(-rad, vec)
+     *
+     *      // Quaternionを以下のように計算
+     *      // RPQ (RはQの共役）
+     *      
+     *      p = r.multiply(p);
+     *      p = p.multiply(q);
+     *
+     *      this.v = p.v;
      */
-    function makeRotatialQuaternion(radian, vector) {
+    Quaternion.makeRotatialQuaternion = function (radian, vector) {
 
         var ret = new Quaternion(),
             ccc = 0,
@@ -91,21 +109,25 @@
 
         axis.normalize();
 
+        /*!
+         * Quaternionの中の数値は以下。
+         * q = [ cos(θ/2) sin(θ/2)n ] //nはベクトル
+         *   = [ cos(θ/2) (sin(θ/2)nx sin(θ/2)ny sin(θ/2)nz ] //ベクトル成分を分解して表記
+         */
         ccc = cos(0.5 * radian);
         sss = sin(0.5 * radian);
 
-        t = ccc;
+        var t = ccc;
         axis.multiplyScalar(sss);
 
         ret.set(t, axis);
 
         return ret;
-    }
+    };
 
     /*!--------------------------------------------------
       EXPORTS
     ----------------------------------------------------- */
     exports.Quaternion = Quaternion;
-    exports.makeRotatialQuaternion = makeRotatialQuaternion;
 
 }(window, document, window));

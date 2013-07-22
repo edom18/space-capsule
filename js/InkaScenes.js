@@ -152,27 +152,63 @@ InkaScenes.prototype.update = function () {
     );
 };
 
-InkaScenes.prototype.rotateX = (function () {
+InkaScenes.prototype.rotateX = function (angle) {
+    this._angleX = angle;
+};
+
+InkaScenes.prototype.getRotateXMatrix = (function () {
     
     var m = new Matrix4();
     var mat = m.identity(m.create());
-    var axis = new Vector3(1, 0, 0);
+    var axis = new Vector4(1, 0, 0, 0);
+    var translateFilter = new Vector4(0, 0, 0, 1);
 
-    return function (angle) {
-        var tmp = m.identity(m.create());
-        this._rotateXMatrix = m.rotate(tmp, angle, axis, mat);
+    return function () {
+        mat = m.identity(m.create());
+        var translateMatrix1 = m.identity(m.create());
+        var translateMatrix2 = m.identity(m.create());
+        var rotateMatrix     = m.identity(m.create());
+        var local_axis       = axis.applyMatrix4(this.viewMatrix);
+        var translateVector  = translateFilter.applyMatrix4(this.viewMatrix);
+
+        m.translate(translateMatrix2, translateVector, translateMatrix2);
+        translateVector.multiplyScalar(-1);
+        m.translate(translateMatrix1, translateVector, translateMatrix1);
+        m.rotate(rotateMatrix, this._angleX || 0, local_axis, rotateMatrix);
+        m.multiply(translateMatrix1, rotateMatrix, mat);
+        m.multiply(mat, translateMatrix2, mat);
+
+        return mat;
     };
 }());
 
-InkaScenes.prototype.rotateY = (function () {
+InkaScenes.prototype.rotateY = function (angle) {
+    this._angleY = angle;
+};
+
+InkaScenes.prototype.getRotateYMatrix = (function () {
     
     var m = new Matrix4();
     var mat = m.identity(m.create());
-    var axis = new Vector3(0, 1, 0);
+    var axis = new Vector4(0, 1, 0, 0);
+    var translateFilter = new Vector4(0, 0, 0, 1);
 
-    return function (angle) {
-        var tmp = m.identity(m.create());
-        this._rotateYMatrix = m.rotate(tmp, angle, axis, mat);
+    return function () {
+        mat = m.identity(m.create());
+        var translateMatrix1 = m.identity(m.create());
+        var translateMatrix2 = m.identity(m.create());
+        var rotateMatrix     = m.identity(m.create());
+        var local_axis       = axis.applyMatrix4(this.viewMatrix);
+        var translateVector  = translateFilter.applyMatrix4(this.viewMatrix);
+
+        m.translate(translateMatrix2, translateVector, translateMatrix2);
+        translateVector.multiplyScalar(-1);
+        m.translate(translateMatrix1, translateVector, translateMatrix1);
+        m.rotate(rotateMatrix, this._angleY || 0, local_axis, rotateMatrix);
+        m.multiply(translateMatrix1, rotateMatrix, mat);
+        m.multiply(mat, translateMatrix2, mat);
+
+        return mat;
     };
 }());
 
@@ -203,12 +239,16 @@ InkaScenes.prototype.render = (function () {
             viewMatrix = this.viewMatrix,
             projectionMatrix = this.projectionMatrix;
 
-        if (this._rotateXMatrix) {
-            m.multiply(viewMatrix, this._rotateXMatrix, viewMatrix);
+        var mat = null;
+
+        for (var i = 0, l = viewMatrix.length; i < l; i++) {
+            if (viewMatrix[i] !== 0) {
+                mat = m.identity(m.create());
+                m.multiply(viewMatrix, this.getRotateYMatrix(), mat);
+                m.multiply(mat, this.getRotateXMatrix(), mat);
+            }
         }
-        if (this._rotateYMatrix) {
-            m.multiply(viewMatrix, this._rotateYMatrix, viewMatrix);
-        }
+
         if (this._translateMatrix) {
             m.multiply(viewMatrix, this._translateMatrix, viewMatrix);
         }
@@ -218,6 +258,6 @@ InkaScenes.prototype.render = (function () {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         // render the group using render layer 'color'
-        group.render(viewMatrix, projectionMatrix, 'color');
+        group.render(mat || viewMatrix, projectionMatrix, 'color');
     };
 }());

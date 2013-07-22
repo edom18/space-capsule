@@ -38,6 +38,7 @@ canvas {
 <script src="js/lib/View.js"></script>
 <script src="js/lib/Model.js"></script>
 <script src="js/lib/Vector3.js"></script>
+<script src="js/lib/Vector4.js"></script>
 <script src="js/lib/Matrix4.js"></script>
 <script src="material/world/world.js"></script>
 <script src="js/InkaModel.js"></script>
@@ -103,6 +104,14 @@ canvas {
             this.keyframe(0, LAST_KEYFRAME * KEYFRAME_TIME, {
                 loop: true
             });
+
+            //this.keyframe(0, 1 * KEYFRAME_TIME, {
+            //    //loop: true
+            //});
+        },
+
+        render: function () {
+            this._scene.render();
         },
 
         reset: function () {
@@ -158,7 +167,7 @@ canvas {
             this._scene.rotateY(angle);
         },
 
-        translate: function (v) {
+        translateZ: function (v) {
             this._scene.translate(v);
         }
     });
@@ -180,16 +189,22 @@ canvas {
         prevY = e.pageY;
     }, false);
 
+    var rotX = 0;
+    var rotY = 0;
     doc.addEventListener('mousemove', function (e) {
         if (!dragging) {
             return;
         }
 
-        var x = e.pageX - prevX;
-        var y = e.pageY - prevY;
+        rotX += (e.pageX - prevX) / 10;
+        rotY += (e.pageY - prevY) / 10;
 
-        capsule_view.rotateY(x);
-        capsule_view.rotateX(y);
+        capsule_view.rotateY(rotX);
+        capsule_view.rotateX(rotY);
+        //capsule_view.render();
+
+        prevX = e.pageX;
+        prevY = e.pageY;
     }, false);
 
     doc.addEventListener('mouseup', function (e) {
@@ -200,7 +215,7 @@ canvas {
     doc.addEventListener('mousewheel', function (e) {
         var delta = e.wheelDelta;
         z += delta / 100;
-        capsule_view.translate(new Vector3(0, 0, z));
+        capsule_view.translateZ(z);
     }, false);
 
 }(window, document));
