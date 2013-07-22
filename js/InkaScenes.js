@@ -246,11 +246,10 @@ InkaScenes.prototype.render = (function () {
                 mat = m.identity(m.create());
                 m.multiply(viewMatrix, this.getRotateYMatrix(), mat);
                 m.multiply(mat, this.getRotateXMatrix(), mat);
+                if (this._translateMatrix) {
+                    m.multiply(mat, this._translateMatrix, mat);
+                }
             }
-        }
-
-        if (this._translateMatrix) {
-            m.multiply(viewMatrix, this._translateMatrix, viewMatrix);
         }
 
         // render scene
